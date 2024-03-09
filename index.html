@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>License Plate Recognition</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+        }
+        .container-fluid {
+            height: 100%;
+        }
+        .row {
+            height: 100%;
+        }
+        .col {
+            display: flex;
+            flex-direction: column;
+        }
+        #live-view img {
+            width: auto;
+            height: auto;
+            max-width: 100%;
+            max-height: 100%;
+        }
+        #detected-plates {
+            flex: 1;
+            background-color: #fff;
+            overflow-y: auto;
+            border-left: 1px solid #ddd;
+        }
+        .plate-entry {
+            font-size: 20px;
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-8" id="live-view">
+                <img id="live-feed-image" src="/static/latest_image.jpg" alt="Live feed">
+            </div>
+            <div class="col-md-4" id="detected-plates">
+                <h4 class="text-center">Detected Plates</h4>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        document.addEventListener('DOMContentLoaded', () => {
+            var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port);
+            socket.on('new_plate_number', function(data) {
+                const plateList = document.getElementById('detected-plates');
+                const entry = document.createElement('div');
+                entry.classList.add('plate-entry');
+                entry.textContent = data.plate;
+                plateList.appendChild(entry);
+            });
+
+            setInterval(() => {
+                const image = document.getElementById('live-feed-image');
+                const timestamp = new Date().getTime();
+                image.src = '/static/latest_image.jpg?' + timestamp; // Avoid caching by appending a timestamp
+            }, 2000); // Refresh the image every 2 seconds
+        });
+    </script>
+</body>
+</html>
